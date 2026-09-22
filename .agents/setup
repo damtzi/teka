@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly NODE_MAJOR=24
+readonly PNPM_VERSION=10.18.0
+readonly SUPABASE_VERSION=2.117.0
+readonly NODE_HOME="$HOME/.local/share/node-v${NODE_MAJOR}"
+readonly LOCAL_BIN="$HOME/.local/bin"
+readonly TEMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TEMP_DIR"' EXIT
+
+step() {
+	local label="$1"
+	shift
+	local started=$SECONDS
+	printf '\n==> %s\n' "$label"
+	"$@"
+	printf '<== %s (%ss)\n' "$label" "$((SECONDS - started))"
+}
+
+install_node() {
+	if [[ -x "$NODE_HOME/bin/node" ]] && [[ "$("$NODE_HOME/bin/node" -p 'process.versions.node.split(".")[0]')" == "$NODE_MAJOR" ]]; then
+		printf 'Node %s already installed\n' "$("$NODE_HOME/bin/node" --version)"
+		return
+	fi
+
+	local architecture
+	case "$(uname -m)" in
+		x86_64) architecture=x64 ;;
+		aarch64 | arm64) architecture=arm64 ;;
+		*) printf 'Unsupported architecture: %s\n' "$(uname -m)" >&2; return 1 ;;
+	esac
+
+	local download_dir archive checksum_file archive_name
+	download_dir="$TEMP_DIR/node"
+	mkdir -p "$download_dir"
+	checksum_file="$download_dir/SHASUMS256.txt"
+	curl -fsSL "https://nodejs.org/dist/latest-v${NODE_MAJOR}.x/SHASUMS256.txt" -o "$checksum_file"
+	archive_name="$(awk -v suffix="linux-${architecture}.tar.xz" '$2 ~ suffix "$" { print $2; exit }' "$checksum_file")"
+	[[ -n "$archive_name" ]]
+	archive="$download_dir/$archive_name"
+	curl -fsSL "https://nodejs.org/dist/latest-v${NODE_MAJOR}.x/$archive_name" -o "$archive"
+	(cd "$download_dir" && grep " $archive_name\$" SHASUMS256.txt | sha256sum --check --status)
+
+	rm -rf "$NODE_HOME.new"
+	mkdir -p "$NODE_HOME.new"
+	tar -xJf "$archive" --strip-components=1 -C "$NODE_HOME.new"
+	rm -rf "$NODE_HOME"
+	mv "$NODE_HOME.new" "$NODE_HOME"
+}
+
+configure_path() {
+	mkdir -p "$LOCAL_BIN"
+	local marker='# teka orb toolchain'
+	if ! grep -Fqx "$marker" "$HOME/.bash_profile" 2>/dev/null; then
+		cat >> "$HOME/.bash_profile" <<EOF
+
+$marker
+export PATH="$NODE_HOME/bin:$LOCAL_BIN:\$PATH"
+EOF
+	fi
+}
+
+install_pnpm() {
+	if [[ -x "$NODE_HOME/bin/pnpm" ]] && [[ "$("$NODE_HOME/bin/pnpm" --version)" == "$PNPM_VERSION" ]]; then
+		printf 'pnpm %s already installed\n' "$PNPM_VERSION"
+		return
+	fi
+
+	"$NODE_HOME/bin/npm" install --global --force "pnpm@$PNPM_VERSION"
+}
+
+install_supabase() {
+	if [[ -x "$LOCAL_BIN/supabase" ]] && [[ "$("$LOCAL_BIN/supabase" --version)" == "$SUPABASE_VERSION" ]]; then
+		printf 'Supabase CLI %s already installed\n' "$SUPABASE_VERSION"
+		return
+	fi
+
+	local architecture
+	case "$(uname -m)" in
+		x86_64) architecture=amd64 ;;
+		aarch64 | arm64) architecture=arm64 ;;
+		*) printf 'Unsupported architecture: %s\n' "$(uname -m)" >&2; return 1 ;;
+	esac
+
+	local download_dir archive archive_name release_url
+	download_dir="$TEMP_DIR/supabase"
+	mkdir -p "$download_dir"
+	archive_name="supabase_${SUPABASE_VERSION}_linux_${architecture}.tar.gz"
+	release_url="https://github.com/supabase/cli/releases/download/v${SUPABASE_VERSION}"
+	archive="$download_dir/$archive_name"
+	curl -fsSL "$release_url/$archive_name" -o "$archive"
+	curl -fsSL "$release_url/checksums.txt" -o "$download_dir/checksums.txt"
+	(cd "$download_dir" && grep " $archive_name\$" checksums.txt | sha256sum --check --status)
+	tar -xzf "$archive" -C "$download_dir" supabase
+	install -m 0755 "$download_dir/supabase" "$LOCAL_BIN/supabase"
+}
+
+install_semgrep() {
+	if command -v semgrep >/dev/null 2>&1; then
+		printf 'Semgrep %s already installed\n' "$(semgrep --version)"
+		return
+	fi
+
+	uv tool install semgrep
+}
+
+step 'Install Node.js' install_node
+step 'Configure login-shell PATH' configure_path
+export PATH="$NODE_HOME/bin:$LOCAL_BIN:$PATH"
+step 'Install pnpm' install_pnpm
+step 'Install Supabase CLI' install_supabase
+step 'Install Semgrep' install_semgrep
+step 'Install workspace dependencies' pnpm install --frozen-lockfile
+
+if [[ ! -f .env ]]; then
+	cp -- .env.example .env
+	printf '\nCreated .env from .env.example\n'
+fi
+
+printf '\nOrb setup complete: Node %s, pnpm %s, Supabase CLI %s\n' \
+	"$(node --version)" "$(pnpm --version)" "$(supabase --version)"

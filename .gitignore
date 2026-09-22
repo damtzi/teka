@@ -19,6 +19,9 @@ coverage
 # Turbo
 .turbo
 
+# Amp
+.amp/portals/*
+
 # Vercel
 .vercel
 
