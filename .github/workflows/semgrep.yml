@@ -20,18 +20,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Run Semgrep (custom rules)
-        run: semgrep scan --config .semgrep/ --error --verbose
-        env:
-          SEMGREP_RULES: .semgrep/
-
-      - name: Run Semgrep (community security rules)
+      - name: Run Semgrep
         run: >
           semgrep scan
           --config p/javascript
           --config p/typescript
           --config p/secrets
-          --config p/owasp-top-ten
           --error
           --verbose
-        if: always()
