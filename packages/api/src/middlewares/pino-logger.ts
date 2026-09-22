@@ -11,7 +11,9 @@ const rootLogger = pino(
 );
 
 const pinoLogger = structuredLogger({
-	createLogger: (c) => rootLogger.child({ requestId: c.var.requestId })
+	createLogger: (c) => rootLogger.child({ requestId: c.var.requestId }),
+	onResponse: (logger, c, elapsedMs) =>
+		logger.info({ method: c.req.method, path: c.req.path, elapsedMs }, 'request completed')
 });
 
 export default pinoLogger;

@@ -20,6 +20,6 @@
 	"dependencies": {
 		"@repo/db": "workspace:*",
 		"@repo/env": "workspace:*",
-		"better-auth": "^1.6.11"
+		"better-auth": "^1.7.5"
 	}
 }

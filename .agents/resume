@@ -2,7 +2,7 @@
 set -euo pipefail
 
 [[ "$(node -p 'process.versions.node.split(".")[0]')" == 24 ]]
-[[ "$(pnpm --version)" == 10.18.0 ]]
+[[ "$(pnpm --version)" == 12.5.1 ]]
 command -v supabase >/dev/null
 command -v semgrep >/dev/null
 

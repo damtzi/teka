@@ -20,7 +20,7 @@ export default function configureOpenApi(app: AppOpenApi) {
 			theme: 'bluePlanet',
 			layout: 'classic',
 			defaultHttpClient: {
-				targetKey: 'javascript',
+				targetKey: 'js',
 				clientKey: 'fetch'
 			}
 		})

@@ -23,15 +23,15 @@
 	},
 	"dependencies": {
 		"@repo/env": "workspace:*",
-		"better-auth": "^1.6.11",
-		"drizzle-orm": "^0.45.2",
-		"pg": "^8.21.0",
-		"zod": "^4.4.3"
+		"better-auth": "^1.7.5",
+		"drizzle-orm": "^0.45.3",
+		"pg": "^8.23.0",
+		"zod": "^4.6.5"
 	},
 	"devDependencies": {
 		"@repo/typescript-config": "workspace:*",
-		"@types/pg": "^8.20.0",
-		"drizzle-kit": "^0.31.10",
+		"@types/pg": "^8.23.1",
+		"drizzle-kit": "^0.31.11",
 		"typescript": "catalog:"
 	}
 }

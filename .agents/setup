@@ -2,7 +2,7 @@
 set -euo pipefail
 
 readonly NODE_MAJOR=24
-readonly PNPM_VERSION=10.18.0
+readonly PNPM_VERSION=12.5.1
 readonly SUPABASE_VERSION=2.117.0
 readonly NODE_HOME="$HOME/.local/share/node-v${NODE_MAJOR}"
 readonly LOCAL_BIN="$HOME/.local/bin"
