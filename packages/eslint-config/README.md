@@ -1,9 +1,9 @@
-# @repo/eslint-config
+# @teka/eslint-config
 
-Shared ESLint configurations for this template monorepo.
+Shared ESLint configurations for Teka.
 
 ## Exports
 
-- `@repo/eslint-config` — base TypeScript/JavaScript config.
-- `@repo/eslint-config/configs/web` — Svelte/SvelteKit UI config.
-- `@repo/eslint-config/configs/backend` — Node/backend config.
+- `@teka/eslint-config` — base TypeScript/JavaScript config.
+- `@teka/eslint-config/configs/web` — Svelte/SvelteKit UI config.
+- `@teka/eslint-config/configs/backend` — Node/backend config.

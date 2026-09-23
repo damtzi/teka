@@ -1,14 +1,10 @@
 {
-	"name": "svelte-monorepo-template",
+	"name": "teka",
 	"private": true,
 	"scripts": {
 		"build": "turbo run build",
 		"check-types": "turbo run check-types",
 		"dev": "turbo run dev",
-		"db:start": "pnpm --filter @repo/db supabase:start",
-		"db:stop": "pnpm --filter @repo/db supabase:stop",
-		"db:status": "pnpm --filter @repo/db supabase:status",
-		"db:reset": "pnpm --filter @repo/db supabase:reset",
 		"format": "prettier --write .",
 		"lint": "turbo run lint",
 		"lint-staged": "lint-staged",
@@ -19,14 +15,13 @@
 			"eslint --fix",
 			"prettier --write"
 		],
-		"*.astro": "prettier --write",
 		"*.{json,md}": "prettier --write"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^21.2.3",
 		"@commitlint/config-conventional": "^21.2.3",
 		"@eslint/compat": "catalog:",
-		"@repo/eslint-config": "workspace:*",
+		"@teka/eslint-config": "workspace:*",
 		"eslint": "catalog:",
 		"husky": "^9.1.7",
 		"lint-staged": "^17.5.1",
